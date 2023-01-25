@@ -89,8 +89,8 @@ type ifd struct {
 	PhotometricInterpretation uint16   `tiff:"field,tag=262"`
 	DocumentName              string   `tiff:"field,tag=269"`
 	SamplesPerPixel           uint16   `tiff:"field,tag=277"`
-	XResolution               big.Rat  `tiff:"field,tag=282"`
-	YResolution               big.Rat  `tiff:"field,tag=282"`
+	XResolution               *big.Rat  `tiff:"field,tag=282"`
+	YResolution               *big.Rat  `tiff:"field,tag=282"`
 	PlanarConfiguration       uint16   `tiff:"field,tag=284"`
 	ResolutionUnit            uint16   `tiff:"field,tag=296"`
 	DateTime                  string   `tiff:"field,tag=306"`
@@ -693,7 +693,7 @@ func (cog *cog) writeIFD(w io.Writer, ifd *ifd, offset uint64, striledata *tagDa
 
 	//XResolution                uint16   `tiff:"field,tag=282"`
 	if ifd.XResolution.Num().Uint64() > 0 {
-		err := cog.writeField(w, 282, ifd.XResolution)
+		err := cog.writeArray(w, 282, ifd.XResolution, overflow)
 		if err != nil {
 			panic(err)
 		}
@@ -701,7 +701,7 @@ func (cog *cog) writeIFD(w io.Writer, ifd *ifd, offset uint64, striledata *tagDa
 
 	//YResolution                uint16   `tiff:"field,tag=283"`
 	if ifd.YResolution.Num().Uint64() > 0 {
-		err := cog.writeField(w, 283, ifd.YResolution)
+		err := cog.writeArray(w, 283, ifd.YResolution, overflow)
 		if err != nil {
 			panic(err)
 		}

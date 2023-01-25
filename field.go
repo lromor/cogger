@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 )
 
 func arrayFieldSize(data interface{}, bigtiff bool) uint64 {
 	if bigtiff {
 		switch d := data.(type) {
+		case *big.Rat:
+			return 20
 		case []byte:
 			if len(d) <= 8 {
 				return 20
@@ -70,6 +73,8 @@ func arrayFieldSize(data interface{}, bigtiff bool) uint64 {
 		}
 	} else {
 		switch d := data.(type) {
+		case *big.Rat:
+			return uint64(12 + 8)
 		case []byte:
 			if len(d) <= 4 {
 				return 12
@@ -131,6 +136,18 @@ func (cog *cog) writeArray(w io.Writer, tag uint16, data interface{}, tags *tagD
 	}
 	cog.enc.PutUint16(buf[0:2], tag)
 	switch d := data.(type) {
+	case *big.Rat:
+		cog.enc.PutUint16(buf[2:4], tRational)
+		if cog.bigtiff {
+			cog.enc.PutUint64(buf[4:12], 1)
+			cog.enc.PutUint32(buf[12:16], uint32(d.Num().Uint64()))
+			cog.enc.PutUint32(buf[16:], uint32(d.Num().Uint64()))
+		} else {
+			cog.enc.PutUint32(buf[4:8], 1)
+			cog.enc.PutUint32(buf[8:], uint32(tags.NextOffset()))
+			binary.Write(tags, cog.enc, uint32(d.Num().Uint64()))
+			binary.Write(tags, cog.enc, uint32(d.Denom().Uint64()))
+		}
 	case []byte:
 		n := len(d)
 		cog.enc.PutUint16(buf[2:4], tByte)
