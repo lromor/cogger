@@ -717,7 +717,7 @@ func (cog *cog) writeIFD(w io.Writer, ifd *ifd, offset uint64, striledata *tagDa
 
 	//ResolutionUnit            uint16   `tiff:"field,tag=296"`
 	if ifd.ResolutionUnit > 0 {
-		err := cog.writeField(w, 296, ifd.PlanarConfiguration)
+		err := cog.writeField(w, 296, ifd.ResolutionUnit)
 		if err != nil {
 			panic(err)
 		}
