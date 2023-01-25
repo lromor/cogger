@@ -1,4 +1,4 @@
-module github.com/airbusgeo/cogger
+module github.com/lromor/cogger
 
 go 1.16
 

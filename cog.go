@@ -70,6 +70,14 @@ const (
 	photometricInterpretationLOGLUV     = 32845
 )
 
+type resolutionUnit uint16
+
+const (
+	resolutionUnitNone      = 1
+	resolutionUnitInch      = 2
+	resoltionUnitCentimeter = 3
+)
+
 type ifd struct {
 	//Any field added here should also be accounted for in WriteIFD and ifd.Fieldcount
 	SubfileType               uint32   `tiff:"field,tag=254"`
@@ -80,7 +88,10 @@ type ifd struct {
 	PhotometricInterpretation uint16   `tiff:"field,tag=262"`
 	DocumentName              string   `tiff:"field,tag=269"`
 	SamplesPerPixel           uint16   `tiff:"field,tag=277"`
+	XResolution               uint64  `tiff:"field,tag=282"`
+	YResolution               uint64  `tiff:"field,tag=282"`
 	PlanarConfiguration       uint16   `tiff:"field,tag=284"`
+	ResolutionUnit            uint16   `tiff:"field,tag=296"`
 	DateTime                  string   `tiff:"field,tag=306"`
 	Predictor                 uint16   `tiff:"field,tag=317"`
 	Colormap                  []uint16 `tiff:"field,tag=320"`
@@ -207,12 +218,24 @@ func (ifd *ifd) structure(bigtiff bool) (tagCount, ifdSize, strileSize, planeCou
 		cnt++
 		size += tagSize
 	}
+	if ifd.XResolution > 0 {
+		cnt++
+		size += tagSize
+	}
+	if ifd.YResolution > 0 {
+		cnt++
+		size += tagSize
+	}
 	if ifd.PlanarConfiguration > 0 {
 		cnt++
 		size += tagSize
 	}
 	if ifd.PlanarConfiguration == 2 {
 		planeCount = uint64(ifd.SamplesPerPixel)
+	}
+	if ifd.ResolutionUnit > 0 {
+		cnt++
+		size += tagSize
 	}
 	if len(ifd.DateTime) > 0 {
 		cnt++
@@ -667,9 +690,33 @@ func (cog *cog) writeIFD(w io.Writer, ifd *ifd, offset uint64, striledata *tagDa
 		}
 	}
 
+	//XResolution                uint16   `tiff:"field,tag=282"`
+	if ifd.XResolution > 0 {
+		err := cog.writeField(w, 282, ifd.XResolution)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	//YResolution                uint16   `tiff:"field,tag=283"`
+	if ifd.YResolution > 0 {
+		err := cog.writeField(w, 283, ifd.YResolution)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	//PlanarConfiguration       uint16   `tiff:"field,tag=284"`
 	if ifd.PlanarConfiguration > 0 {
 		err := cog.writeField(w, 284, ifd.PlanarConfiguration)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	//ResolutionUnit            uint16   `tiff:"field,tag=296"`
+	if ifd.ResolutionUnit > 0 {
+		err := cog.writeField(w, 296, ifd.PlanarConfiguration)
 		if err != nil {
 			panic(err)
 		}
