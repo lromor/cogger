@@ -221,11 +221,11 @@ func (ifd *ifd) structure(bigtiff bool) (tagCount, ifdSize, strileSize, planeCou
 	}
 	if ifd.XResolution.Num().Uint64() > 0 {
 		cnt++
-		size += tagSize
+		size += arrayFieldSize(ifd.XResolution, bigtiff)
 	}
 	if ifd.YResolution.Num().Uint64() > 0 {
 		cnt++
-		size += tagSize
+		size += arrayFieldSize(ifd.YResolution, bigtiff)
 	}
 	if ifd.PlanarConfiguration > 0 {
 		cnt++
