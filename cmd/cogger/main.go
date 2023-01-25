@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/airbusgeo/cogger"
+	"github.com/lromor/cogger"
 
 	"github.com/google/tiff"
 	_ "github.com/google/tiff/bigtiff"
